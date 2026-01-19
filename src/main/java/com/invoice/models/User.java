@@ -10,8 +10,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+@Data
 @Entity
 @Table(name = "users")
 @EntityListeners({AuditingEntityListener.class})
