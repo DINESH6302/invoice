@@ -1,6 +1,6 @@
 package com.invoice.repositories.columnviews;
 
-public interface OrgNameView {
+public interface OrgSummaryView {
     Long getOrgId();
     String getOrgName();
 }

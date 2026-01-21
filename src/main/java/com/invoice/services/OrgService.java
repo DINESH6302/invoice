@@ -1,20 +1,24 @@
 package com.invoice.services;
 
+import com.invoice.dto.AddressResponseDto;
 import com.invoice.dto.OrgCreationRequestDto;
+import com.invoice.dto.OrgDetailsResponseDto;
 import com.invoice.exception.DuplicateResourceException;
 import com.invoice.exception.NotFountException;
 import com.invoice.models.Organization;
 import com.invoice.models.User;
 import com.invoice.repositories.OrgRepository;
 import com.invoice.repositories.UserRepository;
-import com.invoice.repositories.columnviews.OrgNameView;
+import com.invoice.repositories.columnviews.OrgSummaryView;
 import com.invoice.utils.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,24 +33,46 @@ public class OrgService {
         this.userRepo = userRepo;
     }
 
-    public List<String> getAllOrgNames() {
+    public List<Map> getAllOrgNames() {
 
-        List<OrgNameView> orgNameList = orgRepo.findByUser_UserId(getUserObject().getUserId());
+        List<OrgSummaryView> orgSummaryViews = orgRepo.findByUser_UserId(getUserObject().getUserId());
 
-        return orgNameList.stream()
-                .map(OrgNameView::getOrgName)
-                .toList();
+        List<Map> orgSummaryList = new ArrayList<>();
+
+        for (OrgSummaryView v : orgSummaryViews) {
+            Map<String, String> map = new HashMap<>();
+            map.put("org_id", String.valueOf(v.getOrgId()));
+            map.put("org_name", v.getOrgName());
+            orgSummaryList.add(map);
+        }
+
+        return orgSummaryList;
     }
 
-    public List<Organization> getAllOrgByUSer() {
-        List<Organization> orgList = orgRepo.getOrganizationByUser(getUserObject());
+    public OrgDetailsResponseDto getOrgDetails(Long orgId) {
 
-        return orgList;
+        Organization org = orgRepo.findById(orgId)
+                .orElseThrow(() -> new NotFountException("Organization not found."));
+
+        AddressResponseDto addressDto = new AddressResponseDto();
+        addressDto.setStreet(org.getAddress().getStreet());
+        addressDto.setCity(org.getAddress().getCity());
+        addressDto.setState(org.getAddress().getState());
+        addressDto.setZipCode(org.getAddress().getZipCode());
+        addressDto.setCountry(org.getAddress().getCountry());
+
+        OrgDetailsResponseDto orgDetailsDto = new OrgDetailsResponseDto();
+        orgDetailsDto.setOrgId(org.getOrgId());
+        orgDetailsDto.setOrgName(org.getOrgName());
+        orgDetailsDto.setGstNo(org.getGstNo());
+        orgDetailsDto.setCurrency(org.getCurrency());
+        orgDetailsDto.setAddress(addressDto);
+
+        return orgDetailsDto;
     }
 
     @Transactional
-    public Organization createOrg(OrgCreationRequestDto requestDto) {
-
+    public Long createOrg(OrgCreationRequestDto requestDto) {
         Organization org = new Organization();
         org.setUser(getUserObject());
         org.setOrgName(requestDto.getOrgName());
@@ -58,8 +84,9 @@ public class OrgService {
         if (orgRepo.existsByOrgName(org.getOrgName())) {
             throw new DuplicateResourceException("Organization with name " + org.getOrgName() + " already exists.");
         }
+        orgRepo.save(org);
 
-        return orgRepo.save(org);
+        return org.getOrgId();
     }
 
     public User getUserObject() {
@@ -93,7 +120,7 @@ public class OrgService {
         Optional<Organization> org = orgRepo.findById(orgId);
 
         if (org.isEmpty()) {
-            throw new NotFountException("Organization with id " + orgId + " not found.");
+            throw new NotFountException("Organization not found.");
         }
 
         orgRepo.deleteById(orgId);

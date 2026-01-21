@@ -1,7 +1,9 @@
 package com.invoice.controllers;
 
+import com.invoice.dto.AddressResponseDto;
 import com.invoice.dto.ApiResponse;
 import com.invoice.dto.OrgCreationRequestDto;
+import com.invoice.dto.OrgDetailsResponseDto;
 import com.invoice.models.Organization;
 import com.invoice.services.OrgService;
 import jakarta.validation.Valid;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,26 +35,31 @@ public class OrgController {
         this.orgService = orgService;
     }
 
-    @GetMapping("/names")
-    public ResponseEntity<List<String>> getAllOrgNames() {
-        List<String> orgNames = orgService.getAllOrgNames();
+    @GetMapping("/summary")
+    public ResponseEntity<List<Map>> getAllOrgNames() {
+        List<Map> orgNames = orgService.getAllOrgNames();
 
         return ResponseEntity.ok().body(orgNames);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Organization>> getAllOrgByUser() {
-        List<Organization> orgList = orgService.getAllOrgByUSer();
+    @GetMapping("/{orgId}")
+    public ResponseEntity<ApiResponse<OrgDetailsResponseDto>> getOrgDetails(@PathVariable Long orgId) {
+        OrgDetailsResponseDto orgDetails = orgService.getOrgDetails(orgId);
 
-        return ResponseEntity.ok().body(orgList);
+        ApiResponse<OrgDetailsResponseDto> apiResponse = new ApiResponse<>();
+        apiResponse.setSuccess(true);
+        apiResponse.setData(orgDetails);
+        apiResponse.setMessage("Organization details fetched successfully.");
+
+        return ResponseEntity.ok().body(apiResponse);
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<Map>> createOrg(@RequestBody @Valid OrgCreationRequestDto requestDto) {
-        Organization org = orgService.createOrg(requestDto);
+        Long orgId = orgService.createOrg(requestDto);
 
         ApiResponse<Map> response = new ApiResponse<>();
-        Map<String, Object> data = Map.of("orgId", org.getOrgId());
+        Map<String, Object> data = Map.of("orgId", orgId);
 
         response.setSuccess(true);
         response.setData(data);

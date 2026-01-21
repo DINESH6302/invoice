@@ -34,7 +34,7 @@ public class Organization extends BaseModel {
 
     private String currency;
 
-    @Column(name = "gst_no", nullable = false, unique = true)
+    @Column(name = "gst_no", nullable = false)
     private String gstNo;
 
     @OneToOne(cascade = CascadeType.PERSIST)
