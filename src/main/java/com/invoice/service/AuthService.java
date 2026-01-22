@@ -92,8 +92,10 @@ public class AuthService {
         refreshToken.setIssuedAt(Instant.now());
         refreshToken.setExpiresAt(Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS));
 
-        refreshTokenRepo.save(refreshToken);
+        // Delete existing refresh tokens
+        refreshTokenRepo.deleteRefreshTokenByUser(userObject);
 
+        refreshTokenRepo.save(refreshToken);
         return new Tokens(access, refresh);
     }
 
