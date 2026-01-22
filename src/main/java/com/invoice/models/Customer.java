@@ -1,5 +1,6 @@
 package com.invoice.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,22 +23,17 @@ public class Customer extends BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
 
+    @Column(name = "customer_name", nullable = false)
+    private String customerName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "org_id", nullable = false)
     private Organization organization;
 
-    @Column(name = "org_name")
-    private String orgName;
+    @Column(name = "gst_no", nullable = false)
+    private String gstNo;
 
-    private String email;
-
-    @Column(name = "phone_number", unique = true)
-    private String phoneNumber;
-
-    @Column(name = "gst_in", unique = true)
-    private String gstIn;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 }
