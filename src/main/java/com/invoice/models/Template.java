@@ -1,7 +1,12 @@
 package com.invoice.models;
 
 import java.util.Map;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +26,9 @@ public class Template extends BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long templateId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "org_id", nullable = false)
-//    private Organization organization;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "org_id", nullable = false)
+    private Organization organization;
 
     @Column(name = "template_name", nullable = false)
     private String templateName;

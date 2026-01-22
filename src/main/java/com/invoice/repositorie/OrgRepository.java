@@ -11,5 +11,5 @@ public interface OrgRepository extends JpaRepository<Organization, Long> {
 
     List<OrgSummaryView> findByUser_UserId(Long userId);
 
-    Boolean existsByUserIdAndOrgId(Long userId, Long orgId);
+    Boolean existsByUser_UserIdAndOrgId(Long userId, Long orgId);
 }

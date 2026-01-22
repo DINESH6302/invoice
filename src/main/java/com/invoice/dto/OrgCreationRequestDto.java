@@ -19,5 +19,5 @@ public class OrgCreationRequestDto {
     private String currency;
 
     @NotNull
-    private Address address;
+    private AddressDto address;
 }

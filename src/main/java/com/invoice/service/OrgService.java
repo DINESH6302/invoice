@@ -5,6 +5,7 @@ import com.invoice.dto.OrgCreationRequestDto;
 import com.invoice.dto.OrgDetailsResponseDto;
 import com.invoice.exception.DuplicateResourceException;
 import com.invoice.exception.NotFountException;
+import com.invoice.models.Address;
 import com.invoice.models.Organization;
 import com.invoice.models.User;
 import com.invoice.repositorie.OrgRepository;
@@ -73,12 +74,19 @@ public class OrgService {
 
     @Transactional
     public Long createOrg(OrgCreationRequestDto requestDto) {
+        Address address = new Address();
+        address.setStreet(requestDto.getAddress().getStreet());
+        address.setCity(requestDto.getAddress().getCity());
+        address.setState(requestDto.getAddress().getState());
+        address.setZipCode(requestDto.getAddress().getZipCode());
+        address.setCountry(requestDto.getAddress().getCountry());
+
         Organization org = new Organization();
         org.setUser(getUserObject());
         org.setOrgName(requestDto.getOrgName());
         org.setGstNo(requestDto.getGstNo());
         org.setCurrency(requestDto.getCurrency());
-        org.setAddress(requestDto.getAddress());
+        org.setAddress(address);
 
         // check if org name already exists
         if (orgRepo.existsByOrgName(org.getOrgName())) {
@@ -87,6 +95,41 @@ public class OrgService {
         orgRepo.save(org);
 
         return org.getOrgId();
+    }
+
+    @Transactional
+    public void updateOrg(Long orgId, OrgCreationRequestDto requestDto) {
+        Optional<Organization> org = orgRepo.findById(orgId);
+
+        if (org.isEmpty()) {
+            throw new NotFountException("Organization with id " + orgId + " not found.");
+        }
+
+        Address address = new Address();
+        address.setStreet(requestDto.getAddress().getStreet());
+        address.setCity(requestDto.getAddress().getCity());
+        address.setState(requestDto.getAddress().getState());
+        address.setCountry(requestDto.getAddress().getCountry());
+        address.setZipCode(requestDto.getAddress().getZipCode());
+
+        Organization existingOrg = org.get();
+        existingOrg.setOrgName(requestDto.getOrgName());
+        existingOrg.setGstNo(requestDto.getGstNo());
+        existingOrg.setCurrency(requestDto.getCurrency());
+        existingOrg.setAddress(address);
+
+        orgRepo.save(existingOrg);
+    }
+
+    @Transactional
+    public void deleteOrg(Long orgId) {
+        Optional<Organization> org = orgRepo.findById(orgId);
+
+        if (org.isEmpty()) {
+            throw new NotFountException("Organization not found.");
+        }
+
+        orgRepo.deleteById(orgId);
     }
 
     public User getUserObject() {
@@ -98,31 +141,5 @@ public class OrgService {
         }
 
         return user.get();
-    }
-
-    public void updateOrg(Long orgId, OrgCreationRequestDto requestDto) {
-        Optional<Organization> org = orgRepo.findById(orgId);
-
-        if (org.isEmpty()) {
-            throw new NotFountException("Organization with id " + orgId + " not found.");
-        }
-
-        Organization existingOrg = org.get();
-        existingOrg.setOrgName(requestDto.getOrgName());
-        existingOrg.setGstNo(requestDto.getGstNo());
-        existingOrg.setCurrency(requestDto.getCurrency());
-        existingOrg.setAddress(requestDto.getAddress());
-
-        orgRepo.save(existingOrg);
-    }
-
-    public void deleteOrg(Long orgId) {
-        Optional<Organization> org = orgRepo.findById(orgId);
-
-        if (org.isEmpty()) {
-            throw new NotFountException("Organization not found.");
-        }
-
-        orgRepo.deleteById(orgId);
     }
 }

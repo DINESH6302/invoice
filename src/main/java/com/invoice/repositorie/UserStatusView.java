@@ -1,4 +1,4 @@
-package com.invoice.repositories;
+package com.invoice.repositorie;
 
 public interface UserStatusView {
     String getUserStatus();
