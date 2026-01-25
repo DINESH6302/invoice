@@ -9,6 +9,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class TemplateSummaryDto {
     private Long templateId;
+    private Boolean isDefault;
     private String templateName;
     private Instant updatedAt;
 }

@@ -29,7 +29,7 @@ public class JWTService {
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plus(ttl)))
                 .setIssuer("invoice-api")
-                .claim("roles", List.of("ROLE_USER"))
+                .claim("roles", List.of("ADMIN_USER"))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

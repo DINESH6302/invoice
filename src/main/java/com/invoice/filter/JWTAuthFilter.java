@@ -42,7 +42,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 Claims claims = jwtService.parseAndValidate(token).getBody();
                 String username = claims.getSubject();
 
-                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ADMIN_USER"));
 
                 var auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);

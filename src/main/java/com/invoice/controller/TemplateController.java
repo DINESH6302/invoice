@@ -1,9 +1,10 @@
 package com.invoice.controller;
 
 import com.invoice.dto.ApiResponse;
+import com.invoice.dto.DefaultTemplateRequestDto;
 import com.invoice.dto.TemplateCreationRequestDto;
+import com.invoice.dto.TemplateDetailsDto;
 import com.invoice.dto.TemplateSummaryDto;
-import com.invoice.models.Template;
 import com.invoice.repositorie.columnviews.TemplateSummaryView;
 import com.invoice.service.TemplateService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,17 +44,29 @@ public class TemplateController {
         List<TemplateSummaryDto> responseDto = new ArrayList<>();
 
         templateSummaryList.forEach(templateSummary -> {
-            responseDto.add(new TemplateSummaryDto(templateSummary.getTemplateId(), templateSummary.getTemplateName(), templateSummary.getUpdatedAt()));
+            responseDto.add(new TemplateSummaryDto(
+                    templateSummary.getTemplateId(),
+                    templateSummary.getIsDefault(),
+                    templateSummary.getTemplateName(),
+                    templateSummary.getUpdatedAt()));
         });
 
         return ResponseEntity.ok().body(responseDto);
     }
 
     @GetMapping("/{templateId}")
-    public ResponseEntity<Template> getTemplate(@PathVariable Long templateId) {
+    public ResponseEntity<ApiResponse<TemplateDetailsDto>> getTemplate(@PathVariable Long templateId) {
 
-        Template template = templateService.getTemplate(templateId);
-        return ResponseEntity.ok().body(template);
+        TemplateDetailsDto template = templateService.getTemplate(templateId);
+
+        return ResponseEntity.ok().body(new ApiResponse<>(true, "Template fetched successfully.", template));
+    }
+
+    @GetMapping("/default")
+    public ResponseEntity<ApiResponse<TemplateDetailsDto>> getDefaultTemplate() {
+        TemplateDetailsDto template = templateService.getDefaultTemplate();
+
+        return ResponseEntity.ok().body(new ApiResponse<>(true, "Default Template fetched successfully.", template));
     }
 
     @PostMapping
@@ -69,6 +83,14 @@ public class TemplateController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Template Updated successfully.", null));
+    }
+
+    @PatchMapping("/default")
+    public ResponseEntity<ApiResponse<Void>> updateDefaultTemplate(@RequestBody DefaultTemplateRequestDto reqDto) {
+        templateService.updateDefaultTemplate(reqDto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Default template updated successfully.", null));
     }
 
     @DeleteMapping("/{templateId}")

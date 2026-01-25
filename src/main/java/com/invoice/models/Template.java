@@ -42,6 +42,9 @@ public class Template extends BaseModel {
     @Column(name = "accent_color", nullable = false)
     private String accentColor;
 
+    @Column(name = "is_default")
+    private Boolean isDefault;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> header;

@@ -1,7 +1,9 @@
 package com.invoice.service;
 
 import com.invoice.context.OrgContext;
+import com.invoice.dto.DefaultTemplateRequestDto;
 import com.invoice.dto.TemplateCreationRequestDto;
+import com.invoice.dto.TemplateDetailsDto;
 import com.invoice.exception.DuplicateResourceException;
 import com.invoice.exception.NotFountException;
 import com.invoice.models.Organization;
@@ -33,9 +35,46 @@ public class TemplateService {
         return templateSummaryList;
     }
 
-    public Template getTemplate(Long templateId) {
-        return templateRepository.findByTemplateId_AndOrganization_OrgId(templateId, OrgContext.getOrgId())
+    public TemplateDetailsDto getTemplate(Long templateId) {
+        Template template = templateRepository.findByTemplateIdAndOrganization_OrgId(templateId, OrgContext.getOrgId())
                 .orElseThrow(() -> new NotFountException("Template not found."));
+
+        TemplateDetailsDto templateDetailsDto = new TemplateDetailsDto();
+        templateDetailsDto.setTemplateId(template.getTemplateId());
+        templateDetailsDto.setTemplateName(template.getTemplateName());
+        templateDetailsDto.setIsDefault(template.getIsDefault());
+        templateDetailsDto.setFontFamily(template.getFontFamily());
+        templateDetailsDto.setFontSize(template.getFontSize());
+        templateDetailsDto.setAccentColor(template.getAccentColor());
+        templateDetailsDto.setHeader(template.getHeader());
+        templateDetailsDto.setInvoiceMeta(template.getInvoiceMeta());
+        templateDetailsDto.setCustomerDetails(template.getCustomerDetails());
+        templateDetailsDto.setItems(template.getItems());
+        templateDetailsDto.setTotal(template.getTotal());
+        templateDetailsDto.setFooter(template.getFooter());
+
+        return templateDetailsDto;
+    }
+
+    public TemplateDetailsDto getDefaultTemplate() {
+        Template template = templateRepository.findByOrganization_OrgIdAndIsDefaultTrue(OrgContext.getOrgId())
+                .orElseThrow(() -> new NotFountException("No default template not found, make any template as default."));
+
+        TemplateDetailsDto templateDetailsDto = new TemplateDetailsDto();
+        templateDetailsDto.setTemplateId(template.getTemplateId());
+        templateDetailsDto.setTemplateName(template.getTemplateName());
+        templateDetailsDto.setIsDefault(template.getIsDefault());
+        templateDetailsDto.setFontFamily(template.getFontFamily());
+        templateDetailsDto.setFontSize(template.getFontSize());
+        templateDetailsDto.setAccentColor(template.getAccentColor());
+        templateDetailsDto.setHeader(template.getHeader());
+        templateDetailsDto.setInvoiceMeta(template.getInvoiceMeta());
+        templateDetailsDto.setCustomerDetails(template.getCustomerDetails());
+        templateDetailsDto.setItems(template.getItems());
+        templateDetailsDto.setTotal(template.getTotal());
+        templateDetailsDto.setFooter(template.getFooter());
+
+        return templateDetailsDto;
     }
 
     @Transactional
@@ -61,7 +100,7 @@ public class TemplateService {
 
     @Transactional
     public void updateTemplate(Long templateId, TemplateCreationRequestDto updateReqDto) {
-        Template template = templateRepository.findByTemplateId_AndOrganization_OrgId(templateId, OrgContext.getOrgId())
+        Template template = templateRepository.findByTemplateIdAndOrganization_OrgId(templateId, OrgContext.getOrgId())
                 .orElseThrow(() -> new NotFountException("Template not found."));
 
         mapDtoToTemplate(updateReqDto, template);
@@ -69,8 +108,24 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
+    public void updateDefaultTemplate(DefaultTemplateRequestDto reqDto) {
+        // disable existing default template
+        templateRepository.disableDefaultTemplate(OrgContext.getOrgId());
+
+        // set new default template
+        int updatedRows = templateRepository.updateDefaultTemplate(reqDto.getTemplateId(), reqDto.getIsDefault(), OrgContext.getOrgId());
+        if (updatedRows == 0) {
+            throw new NotFountException("Template not found.");
+        }
+    }
+
     @Transactional
     public void deleteTemplate(Long templateId) {
+
+        if(templateRepository.existsByTemplateIdAndIsDefault(templateId, true)) {
+            throw new IllegalStateException("Cannot delete the default template. Please set another template as default first.");
+        }
+
         if (!templateRepository.existsByTemplateId_AndOrganization_OrgId(templateId, OrgContext.getOrgId())) {
             throw new NotFountException("Template not found.");
         }
@@ -83,9 +138,15 @@ public class TemplateService {
     }
 
     private Template mapDtoToTemplate(TemplateCreationRequestDto dto, Template template) {
+        if (dto.getIsDefault()) {
+            // disable existing default template
+            templateRepository.disableDefaultTemplate(OrgContext.getOrgId());
+        }
+
         template.setTemplateName(dto.getTemplateName());
         template.setFontFamily(dto.getFontFamily());
         template.setFontSize(dto.getFontSize());
+        template.setIsDefault(dto.getIsDefault());
         template.setAccentColor(dto.getAccentColor());
         template.setHeader(dto.getHeader());
         template.setInvoiceMeta(dto.getInvoiceMeta());
