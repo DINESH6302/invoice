@@ -3,7 +3,7 @@ package com.invoice.controller;
 import com.invoice.dto.ApiResponse;
 import com.invoice.dto.CustomerCreationReqDto;
 import com.invoice.dto.CustomerDetailsResponseDto;
-import com.invoice.models.Customer;
+import com.invoice.dto.CustomerSummaryResponseDto;
 import com.invoice.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,17 @@ public class CustomerController {
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<List<CustomerSummaryResponseDto>>> getCustomersSummary() {
+        List<CustomerSummaryResponseDto> customersNameList = customerService.getCustomersSummary();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(
+                true,
+                "Customers summary fetched successfully.",
+                customersNameList
+        ));
     }
 
     @GetMapping("/{customerId}")

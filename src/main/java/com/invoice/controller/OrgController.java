@@ -78,17 +78,17 @@ public class OrgController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping
-    public ResponseEntity<ApiResponse<Void>> updateTemplate(@RequestBody @Valid OrgCreationRequestDto requestDto) {
-        orgService.updateOrg(requestDto);
+    @PutMapping("/{orgId}")
+    public ResponseEntity<ApiResponse<Void>> updateTemplate(@PathVariable Long orgId, @RequestBody @Valid OrgCreationRequestDto requestDto) {
+        orgService.updateOrg(orgId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Organization Updated successfully.", null));
     }
 
-    @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> deleteOrg() {
-        orgService.deleteOrg();
+    @DeleteMapping("/{orgId}")
+    public ResponseEntity<ApiResponse<Void>> deleteOrg(@PathVariable Long orgId) {
+        orgService.deleteOrg(orgId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(new ApiResponse<>(true, "Organization deleted successfully.", null));

@@ -4,12 +4,14 @@ import com.invoice.context.OrgContext;
 import com.invoice.dto.AddressDto;
 import com.invoice.dto.CustomerCreationReqDto;
 import com.invoice.dto.CustomerDetailsResponseDto;
+import com.invoice.dto.CustomerSummaryResponseDto;
 import com.invoice.exception.NotFountException;
 import com.invoice.models.Address;
 import com.invoice.models.Customer;
 import com.invoice.models.Organization;
 import com.invoice.repositorie.CustomerRepository;
 import com.invoice.repositorie.OrgRepository;
+import com.invoice.repositorie.columnviews.CustomerSummaryView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,18 @@ public class CustomerService {
         }
 
         return responseDtoList;
+    }
+
+    public List<CustomerSummaryResponseDto> getCustomersSummary() {
+        Long orgId = OrgContext.getOrgId();
+
+        List<CustomerSummaryView> customersSummaryList = customerRepo.findByOrganization_OrgId(orgId);
+
+        return customersSummaryList
+                .stream()
+                .map(c ->
+                        new CustomerSummaryResponseDto(c.getCustomerId(), c.getCustomerName()))
+                .toList();
     }
 
     public CustomerDetailsResponseDto getCustomerById(Long customerId) {

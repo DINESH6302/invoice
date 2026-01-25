@@ -102,7 +102,12 @@ public class OrgService {
     }
 
     @Transactional
-    public void updateOrg(OrgCreationRequestDto requestDto) {
+    public void updateOrg(Long orgId, OrgCreationRequestDto requestDto) {
+
+        if (!orgRepo.existsByUser_UserIdAndOrgId(UserUtil.getUserId(), orgId)) {
+            throw new NotFountException("Organization not found.");
+        }
+
         Optional<Organization> org = orgRepo.findById(OrgContext.getOrgId());
 
         Address address = new Address();
@@ -122,8 +127,12 @@ public class OrgService {
     }
 
     @Transactional
-    public void deleteOrg() {
-        orgRepo.deleteById(OrgContext.getOrgId());
+    public void deleteOrg(Long orgId) {
+        if (!orgRepo.existsByUser_UserIdAndOrgId(UserUtil.getUserId(), orgId)) {
+            throw new NotFountException("Organization not found.");
+        }
+
+        orgRepo.deleteById(orgId);
     }
 
     public User getUserObject() {
