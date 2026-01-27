@@ -13,9 +13,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-@Data
+import java.time.LocalDate;
+import java.util.Map;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "invoices")
 public class Invoice extends BaseModel {
@@ -41,7 +48,7 @@ public class Invoice extends BaseModel {
     private String invoiceNumber;
 
     @Column(name = "date", nullable = false)
-    private String date;
+    private LocalDate date;
 
     @Column(name = "total_amount", nullable = false)
     private Integer totalAmount;
@@ -49,23 +56,29 @@ public class Invoice extends BaseModel {
     @Column(name = "tax_amount")
     private Integer taxAmount;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String header;
+    private Map<String, Object> header;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String meta;
+    private Map<String, Object> invoiceMeta;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String ship;
+    private Map<String, Object> customerDetails;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String items;
+    private Map<String, Object> items;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String total;
+    private Map<String, Object> total;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String footer;
+    private Map<String, Object> footer;
 
     @Column(name = "invoice_status", nullable = false)
     @Enumerated(EnumType.STRING)

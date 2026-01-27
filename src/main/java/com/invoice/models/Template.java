@@ -2,7 +2,6 @@ package com.invoice.models;
 
 import java.util.Map;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -14,9 +13,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "templates")
 public class Template extends BaseModel {
@@ -43,7 +44,7 @@ public class Template extends BaseModel {
     private String accentColor;
 
     @Column(name = "is_default")
-    private Boolean isDefault;
+    private Boolean isDefault = false;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
